@@ -68,7 +68,7 @@ setup errors and initial dependency-resolution warnings remain in private eviden
 Expected injected-failure ERROR logs are not hidden or counted as JUnit failures.
 
 Unrun: broker restart, storage loss, replication/failover, sustained load, multiple
-producers/consumers, real network acknowledgement outage, cloud and hosted CI. An ack
+producers/consumers, real network acknowledgement outage and cloud deployment. An ack
 callback failure was injected in integration tests, not a real network fault. A late
 source-boundary change aborts rebuild and retains its failed target with original unchanged.
 Retained local volumes are not a backup/HA guarantee.
@@ -89,8 +89,8 @@ directly. The full canonical run above verifies the corrected source; no second 
 was used. Deferred minors: none. The earlier canonical `r90cac148f56b` at `3595595` passed
 its functional study on DrvFS in 285.219 s; it is retained unchanged, including its two
 volumes, and is superseded for Linux packaging by this corrected sample. Alongside both
-earlier smokes, eight Project22 named volumes are retained in total. No application
-remote, public push, hosted CI, paid/provider call or cloud resource was created.
+earlier smokes, eight Project22 named volumes are retained in total. The local milestone
+used no paid/provider calls or cloud resources.
 
 Local integration completed on 31 October 2026: main fast-forwarded from `16d503b` to
 `066352a`. Format/clean verification in the main checkout passed 54 Java unit, 28 actual
@@ -100,4 +100,18 @@ copied JUnit reports and integration metadata are private under `.local/integrat
 All 348 raw evidence files were copied into the main checkout with matching hashes.
 The merged feature branch was retired; its old worktree is retained detached, preserving
 archived scratch after the earlier automatic cleanup-policy rejection. Eight data volumes
-remain and no owned containers run. No application publication or remote was created.
+remain and no owned containers run.
+
+On 31 October 2026 Dmitry approved publication of the
+[public source repository](https://github.com/DmitryLyubaev/retail-event-stream).
+The first [hosted Verification run](https://github.com/DmitryLyubaev/retail-event-stream/actions/runs/41175936094)
+passed on source `69b75bdbea7450985c8a6547018512b2ff29a79f`: format/clean build,
+54 Java unit tests, 28 actual Kafka/PostgreSQL integration tests and 23 Python checks,
+with zero failures/errors/skips. Runtime source is unchanged from the corrected local
+sample. The full A1-A7 process-kill/rebuild observations above remain local measurements.
+
+One Ubuntu 24.04 CI job uses the pinned checkout action and Maven/Java image, read-only
+repository permissions, a 20-minute timeout and no deployment credentials. The workflow
+was checked with actionlint 1.7.12; full Git history passed redacted Gitleaks 8.30.1 scanning
+before publication. Secret scanning and push protection are enabled. Raw private evidence,
+environment files, caches and retained volumes remain excluded from Git history.
