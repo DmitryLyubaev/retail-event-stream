@@ -2,7 +2,8 @@
 
 **A1-A7 passed**, one bounded clean-source sample, run `rca880a91e724`.
 One fresh read-only whole-branch review and its single regression-backed correction pass
-are complete. The owner's integration choice remains pending.
+are complete. Dmitry approved the local merge on 31 October 2026; main is integrated
+and post-merge verification passed.
 All schemas, rules and records are independently written and synthetic.
 
 | Identity | Observed value |
@@ -90,3 +91,13 @@ its functional study on DrvFS in 285.219 s; it is retained unchanged, including 
 volumes, and is superseded for Linux packaging by this corrected sample. Alongside both
 earlier smokes, eight Project22 named volumes are retained in total. No application
 remote, public push, hosted CI, paid/provider call or cloud resource was created.
+
+Local integration completed on 31 October 2026: main fast-forwarded from `16d503b` to
+`066352a`. Format/clean verification in the main checkout passed 54 Java unit, 28 actual
+integration and 23 Python checks, with zero failures/errors/skips. Runtime inputs and the
+packaged JAR SHA256 are unchanged from the corrected canonical sample. Verification logs,
+copied JUnit reports and integration metadata are private under `.local/integration-2026-10-31`.
+All 348 raw evidence files were copied into the main checkout with matching hashes.
+The merged feature branch was retired; its old worktree is retained detached, preserving
+archived scratch after the earlier automatic cleanup-policy rejection. Eight data volumes
+remain and no owned containers run. No application publication or remote was created.
