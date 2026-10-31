@@ -21,7 +21,7 @@ limit. Runtime startup was 7.662 s. These are one local sample's wall times, not
 throughput benchmark or performance improvement.
 
 Environment: x86_64 WSL2 Linux 6.18.54.1, Docker Engine 29.7.2, Compose 5.4.0, Python
-3.14.4, eight configured CPUs and 8,298,098,688 bytes engine RAM (about 7.73 GiB).
+3.14.4, eight configured CPUs and 8,298,102,784 bytes engine RAM (about 7.73 GiB).
 No other containers were running at preflight. Containers have explicit memory/CPU limits;
 shared-host timings are not assumed comparable. Java 25, Maven 3.10.0, Boot 4.1.2,
 Spring Kafka 4.1.2, Kafka client 4.2.2, broker 4.3.2, PostgreSQL 17.11, Flyway 12.4.0,
