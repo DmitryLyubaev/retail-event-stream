@@ -1,22 +1,23 @@
 # Local acceptance report, 31 October 2026
 
-**A1-A7 passed**, one bounded clean-source sample, run `r90cac148f56b`.
-Fresh whole-branch review and the owner's integration choice follow this measurement.
+**A1-A7 passed**, one bounded clean-source sample, run `rca880a91e724`.
+One fresh read-only whole-branch review and its single regression-backed correction pass
+are complete. The owner's integration choice remains pending.
 All schemas, rules and records are independently written and synthetic.
 
 | Identity | Observed value |
 |---|---|
-| Tested Git source | `3595595af7533a832b50cb4c2f08ea7f4410bc4a`, clean |
-| Tracked source manifest SHA256 | `90771d7631b333f6a22bcbef3a28bad3ffadb41d52d2448dadf9ca7056334edc` |
-| Runtime input SHA256 | `f7d3e189e3170f637c543ab1841784d6c786825cb8c8d8a6b41b88627395c296` |
+| Tested Git source | `1e8ec079154dcd30961d13bc9afa16d54ad45a33`, clean |
+| Tracked source manifest SHA256 | `7a754c72368f4c569770b368d160f7c5cfd05d536fc5065b7d03a408a4d9bd61` |
+| Runtime input SHA256 | `b65474072a222b338e4d3da5f1084826d0a6704a4721978413410260bd9687fb` |
 | Fixture SHA256 | `5c23d47fbf2b0d4bd2e00fe19f5218763753abdd81b1f1d18cec1c17af5e44fd` |
-| Packaged JAR SHA256 | `88b5c0476b371b66d930798d899ac2d6d571fb8cbb2ca92c192cd38b88e3d13b` |
-| Actual image ID | `sha256:eaa9ebbca4690b0bd6e9552d2ea12ba0397592cf5b5aa38d153df1b392aeea51` |
+| Packaged JAR SHA256 | `4d41567df43675a33c36b8617611e536065c773856b46b2290842794cfda43f2` |
+| Actual image ID | `sha256:8bd58e8924c6f9f022b1aeb8edc9232ee3544d8efc7aabaf560e098b94d10dcc` |
 
-`./scripts/run_checks.sh --run-id r90cac148f56b` exited 0. Verification began at
-03:06:51 UTC (13:06:51 Australia/Brisbane). Build/metadata/image preparation and packaged
-validation took 152.540 s; startup through owned cleanup took 285.219 s, below the 600 s
-limit. Runtime startup was 7.718 s. These are one local sample's wall times, not a
+`./scripts/run_checks.sh --run-id rca880a91e724` exited 0. Verification began at
+03:31:43 UTC (13:31:43 Australia/Brisbane). Build/metadata/image preparation and packaged
+validation took 143.044 s; startup through owned cleanup took 280.764 s, below the 600 s
+limit. Runtime startup was 7.662 s. These are one local sample's wall times, not a
 throughput benchmark or performance improvement.
 
 Environment: x86_64 WSL2 Linux 6.18.54.1, Docker Engine 29.7.2, Compose 5.4.0, Python
@@ -29,12 +30,12 @@ POM, dependency tree and pin lock.
 
 | Case | Actual observation |
 |---|---|
-| A1 | Format/clean build passed: 47 Java unit, 25 actual Kafka/PostgreSQL integration and 22 Python checks; zero failures/errors/skips. Packaged validator matched all 22 records and the independently computed fixture hash. |
+| A1 | Format/clean build passed: 54 Java unit, 28 actual Kafka/PostgreSQL integration and 23 Python checks; zero failures/errors/skips. Packaged validator matched all 22 records and the independently computed fixture hash. |
 | A2 | 22 published coordinates; 12 APPLIED / 3 DUPLICATE / 7 REJECTED, 12 receipts, A/B/C 3/4/2, four applied ordinals each and one late event. Every intermediate disposition/balance/ordinal/raw identity matched the static oracle. Independent SQL matched packaged CLI readback. |
 | A3 | Before commit, PostgreSQL showed an open transaction whose last query inserted processing evidence. External SQL saw A=2, ordinal 0, no target receipt/processing row. SIGKILL gave exit137/OOMfalse. The same committed state remained afterward, the transaction disappeared, and target partition 0 offset 0 remained uncommitted. Restart applied it once and reached the full oracle. |
 | A4 | After commit/pre-ack, external SQL saw A=-1, ordinal 1, one target receipt/processing row and no open target transaction. Offset 0 remained uncommitted. SIGKILL gave exit137/OOMfalse, preserving those observations. Restart logged target redelivery=true, with one effect and full oracle equality. |
-| A5 | Fresh schema/group rebuilt 22 retained A4 records. Original before/after and rebuilt canonical snapshot SHA256 all equalled `6b7eedd8b641d301e6d83fa724c2107a54d89c686e0174750c1361456417adf1`. Original group offsets stayed unchanged. SQL and CLI agreed. |
-| A6 | Separate C+4 samples: two injected transient failures succeeded on attempt three. Three injected failures stopped with exit1, C=0, no receipt/processing row and unadvanced offset; one explicit fault-free restart reached C=4 once. Attempt-start gaps were 0.365/0.526 s and 0.291/0.596 s, including SQL/rollback overhead around 100/500 ms backoffs. |
+| A5 | Fresh schema/group rebuilt 22 retained A4 records. Original before/after and rebuilt canonical snapshot SHA256 all equalled `39d892db7f489e2efeaf2338b637c4e74fc69f53cb00c8c0fc69fdafd250eee2`. Original group offsets stayed unchanged. SQL and CLI agreed. |
+| A6 | Separate C+4 samples: two injected transient failures succeeded on attempt three. Three injected failures stopped with exit1, C=0, no receipt/processing row and unadvanced offset; one explicit fault-free restart reached C=4 once. Attempt-start gaps were 0.292/0.525 s and 0.324/0.561 s, including SQL/rollback overhead around 100/500 ms backoffs. |
 | A7 | Commands/logs, SQL, offsets, exact barriers/process IDs and source/JAR/image identities were retained with SHA256 indexes. Ownership-checked cleanup removed this run's containers and empty network. Zero owned running containers remained; two data volumes remained. |
 
 Assignments were partitions [0,1,2]. The full logs began at [0,0,0] and ended at next
@@ -50,15 +51,15 @@ including rebuild/redeliveries, 97 database attempts including in-process retrie
 90 acknowledged completions. These are separate counts, not 93 independent inputs.
 Each full projection had 12 accepted effects.
 
-Private ignored evidence: `artifacts/r90cac148f56b-verification` contains aggregate
+Private ignored evidence: `artifacts/rca880a91e724-verification` contains aggregate
 `acceptance.json`, copied JUnit reports, effective POM/dependency tree, image inspect,
-versions and source hashes. `artifacts/r90cac148f56b-study` contains runtime `run.json`,
+versions and source hashes. `artifacts/rca880a91e724-study` contains runtime `run.json`,
 acknowledged manifests, SQL/offset snapshots, barrier/kill/restart/retry logs and cleanup
 inventory. Both have SHA256 indexes. Credentials remain in the private ignored environment
 file. Later measured-prose edits do not change tested runtime inputs.
 
-Retained canonical volumes: `p22_r90cac148f56b_kafka_data` and
-`p22_r90cac148f56b_postgres_data`. Earlier smokes `r069a4941ee2f` and `rb048d787f443`
+Retained canonical volumes: `p22_rca880a91e724_kafka_data` and
+`p22_rca880a91e724_postgres_data`. Earlier smokes `r069a4941ee2f` and `rb048d787f443`
 retain two volumes each and honest dirty-source identities; the latter exercised one
 actual postcommit kill in 90.137 s. They are separate from canonical evidence. No canonical
 case failed or was skipped. Development RED assertions, corrected JUnit parameter-source
@@ -76,3 +77,16 @@ within one product-scoped projection. It is not distributed exactly-once, produc
 scale, adoption or commercial streaming experience. A CV-safe description: built and
 tested a local Java/Spring Kafka inventory projection with durable duplicate handling,
 actual pre/post-commit consumer-crash recovery and isolated replay into PostgreSQL.
+
+The fresh reviewer examined `16d503b..b363393` and requested connection-start retry and
+executable packaging fixes. Snapshot incoherence was regraded Important because normal
+concurrent readback could describe a state that never existed. All three were corrected
+in one pass with witnessed RED->GREEN regressions: classified SQLSTATE retry/recovery/stop
+through real transaction/Kafka paths, a writer commit between snapshot reads, and Git
+launcher modes. A Linux-filesystem Git archive also executed the documented launcher
+directly. The full canonical run above verifies the corrected source; no second reviewer
+was used. Deferred minors: none. The earlier canonical `r90cac148f56b` at `3595595` passed
+its functional study on DrvFS in 285.219 s; it is retained unchanged, including its two
+volumes, and is superseded for Linux packaging by this corrected sample. Alongside both
+earlier smokes, eight Project22 named volumes are retained in total. No application
+remote, public push, hosted CI, paid/provider call or cloud resource was created.
