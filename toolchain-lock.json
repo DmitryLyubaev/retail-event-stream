@@ -1,0 +1,93 @@
+{
+  "checkedDate": "2026-10-31",
+  "timezone": "Australia/Brisbane",
+  "purpose": "Project 22 planning pins; metadata/manifests verified, no product build/runtime validation",
+  "toolchain": {
+    "java": 25,
+    "springBoot": "4.1.2",
+    "springKafka": "4.1.2",
+    "kafkaClient": "4.2.2",
+    "kafkaBroker": "4.3.2",
+    "maven": "3.10.0",
+    "flyway": "12.4.0",
+    "testcontainers": "2.0.5",
+    "postgresqlJdbc": "42.7.14",
+    "junitJupiter": "6.0.3",
+    "surefire": "3.5.6",
+    "failsafe": "3.5.6",
+    "jackson": "3.1.7",
+    "mavenWrapperPlugin": "3.3.4",
+    "spotless": "3.10.4",
+    "googleJavaFormat": "1.36.1"
+  },
+  "springBootBom": {
+    "url": "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.1.2/spring-boot-dependencies-4.1.2.pom",
+    "sha256": "3ebfa36de39b9231236456542b09daa0d071b6f4780209323dbe6795a4522124"
+  },
+  "mavenDistribution": {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.10.0/apache-maven-3.10.0-bin.zip",
+    "sha256": "1f6d9909266510f039f59aa0e13dcd2c66da85f043e56276e41f2918f8bddaff",
+    "sha512": "22d31676d5b92ed53308c19ecded3245d0efd0cddfec51ec7bab62f4f13ad70ddddceff8e62940e0e8e2421f3cde8106737f4becec0aa034ffeff2a754e88337",
+    "upstreamSha512Verified": true,
+    "verification": "Fetched archive into memory, matched upstream .sha512 and derived SHA256; .sha256 endpoint returned 404; no archive saved or installed"
+  },
+  "images": [
+    {
+      "repository": "library/maven",
+      "tag": "3.10.0-eclipse-temurin-25-noble",
+      "indexDigest": "sha256:51a751cf747bad5968979a66142d443e8d94854172c3891ae2496edec544c6b3",
+      "platform": "linux/amd64",
+      "platformDigest": "sha256:98104f84952dfc8df0cbf5933d6d460f58cd299d7457ff5645c271853f3d8b6e",
+      "manifestContentHashVerified": true
+    },
+    {
+      "repository": "library/eclipse-temurin",
+      "tag": "25-jre-noble",
+      "indexDigest": "sha256:2ef7a81085e0502d7d4ff7e7c0257b6d4f46433f8ea6021180aa3c8a2b9ca3ec",
+      "platform": "linux/amd64",
+      "platformDigest": "sha256:41a70a160a5a157126929c1901e8dcf17ea4fd88eca1e7b9abf3cb1bb04df6c2",
+      "manifestContentHashVerified": true
+    },
+    {
+      "repository": "library/postgres",
+      "tag": "17.11-bookworm",
+      "indexDigest": "sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5",
+      "platform": "linux/amd64",
+      "platformDigest": "sha256:2cd2c0f809604aaeff6f0ec8f40aecbd025613107561015c69369a1a7f1d3416",
+      "manifestContentHashVerified": true
+    },
+    {
+      "repository": "apache/kafka",
+      "tag": "4.3.2",
+      "indexDigest": "sha256:852a0d49fc4e656b022e7f23785411802c9a088c78a7c5e39f33969de9c227a7",
+      "platform": "linux/amd64",
+      "platformDigest": "sha256:8f325fc00143fed78eabe00b033a86747078bb06edc21345d06651f77ae44f30",
+      "manifestContentHashVerified": true
+    }
+  ],
+  "localPrerequisites": {
+    "windowsJava": "1.8.0_332 on PATH",
+    "windowsMavenAvailable": false,
+    "windowsDockerAvailable": false,
+    "executionEnvironment": "WSL Ubuntu",
+    "dockerEngine": "29.7.2",
+    "dockerCompose": "5.4.0",
+    "architecture": "linux/amd64",
+    "dockerCPUs": 8,
+    "dockerMemoryBytes": 8298106880,
+    "wslJava": "21.0.12.1",
+    "wslPython": "3.14.4",
+    "runningContainersObserved": 0,
+    "freeEApproxGiB": 84,
+    "productRepositoryExists": false
+  },
+  "noProductResourcesCreated": true,
+  "sources": [
+    "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.1.2/spring-boot-dependencies-4.1.2.pom",
+    "https://maven.apache.org/download.cgi",
+    "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.10.0/apache-maven-3.10.0-bin.zip.sha512",
+    "https://repo.maven.apache.org/maven2/",
+    "https://registry-1.docker.io/v2/",
+    "https://java.testcontainers.org/modules/kafka/"
+  ]
+}

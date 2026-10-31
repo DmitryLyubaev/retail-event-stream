@@ -1,0 +1,168 @@
+{
+  "counts": {
+    "APPLIED": 12,
+    "DUPLICATE": 3,
+    "REJECTED": 7
+  },
+  "balances": {
+    "P22_A_5": 3,
+    "P22_B_0": 4,
+    "P22_C_2": 2
+  },
+  "records": [
+    {
+      "index": 0,
+      "disposition": "APPLIED",
+      "postBalance": -1,
+      "ordinal": 1,
+      "lateEvent": false
+    },
+    {
+      "index": 1,
+      "disposition": "APPLIED",
+      "postBalance": 6,
+      "ordinal": 1,
+      "lateEvent": false
+    },
+    {
+      "index": 2,
+      "disposition": "APPLIED",
+      "postBalance": 4,
+      "ordinal": 1,
+      "lateEvent": false
+    },
+    {
+      "index": 3,
+      "disposition": "APPLIED",
+      "postBalance": 0,
+      "ordinal": 2,
+      "lateEvent": false
+    },
+    {
+      "index": 4,
+      "disposition": "DUPLICATE",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 5,
+      "disposition": "APPLIED",
+      "postBalance": 5,
+      "ordinal": 2,
+      "lateEvent": true
+    },
+    {
+      "index": 6,
+      "disposition": "APPLIED",
+      "postBalance": 2,
+      "ordinal": 2,
+      "lateEvent": false
+    },
+    {
+      "index": 7,
+      "disposition": "APPLIED",
+      "postBalance": 5,
+      "ordinal": 3,
+      "lateEvent": false
+    },
+    {
+      "index": 8,
+      "disposition": "APPLIED",
+      "postBalance": 7,
+      "ordinal": 3,
+      "lateEvent": false
+    },
+    {
+      "index": 9,
+      "disposition": "APPLIED",
+      "postBalance": 3,
+      "ordinal": 3,
+      "lateEvent": false
+    },
+    {
+      "index": 10,
+      "disposition": "APPLIED",
+      "postBalance": 3,
+      "ordinal": 4,
+      "lateEvent": false
+    },
+    {
+      "index": 11,
+      "disposition": "APPLIED",
+      "postBalance": 4,
+      "ordinal": 4,
+      "lateEvent": false
+    },
+    {
+      "index": 12,
+      "disposition": "APPLIED",
+      "postBalance": 2,
+      "ordinal": 4,
+      "lateEvent": false
+    },
+    {
+      "index": 13,
+      "disposition": "DUPLICATE",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 14,
+      "disposition": "DUPLICATE",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 15,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 16,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 17,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 18,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 19,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 20,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    },
+    {
+      "index": 21,
+      "disposition": "REJECTED",
+      "postBalance": null,
+      "ordinal": null,
+      "lateEvent": false
+    }
+  ]
+}
