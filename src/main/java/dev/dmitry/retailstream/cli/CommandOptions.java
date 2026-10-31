@@ -20,7 +20,17 @@ public record CommandOptions(String command, Map<String, String> options) {
             ? Set.of("--fixture")
             : args[0].equals("publish")
                 ? Set.of("--fixture", "--run-id", "--scenario", "--manifest", "--sample")
-                : Set.of("--fixture", "--run-id", "--scenario", "--projection", "--manifest");
+                : args[0].equals("consume")
+                    ? Set.of(
+                        "--fixture",
+                        "--run-id",
+                        "--scenario",
+                        "--projection",
+                        "--manifest",
+                        "--fault-stage",
+                        "--fault-event",
+                        "--fail-first")
+                    : Set.of("--fixture", "--run-id", "--scenario", "--projection", "--manifest");
     for (int i = 1; i < args.length; i += 2)
       if (!allowed.contains(args[i])
           || args[i + 1].isBlank()

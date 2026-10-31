@@ -82,6 +82,11 @@ public final class StreamCommands {
         }
         return 0;
       }
+      var hooks =
+          options.command().equals("consume")
+              ? dev.dmitry.retailstream.fault.FaultController.fromOptions(
+                  options.options(), fixture.seed().keySet())
+              : ProcessingHooks.NONE;
       var dataSource = injected == null ? environmentDataSource() : injected;
       if (options.command().equals("rebuild")) {
         var rebuilt =
@@ -96,11 +101,9 @@ public final class StreamCommands {
             new JsonMapper()
                 .writeValueAsString(Map.of("schema", config.schema(), "initialized", true)));
       } else {
-        var store =
-            new ProjectionStore(dataSource, config, fixture.seed().keySet(), ProcessingHooks.NONE);
+        var store = new ProjectionStore(dataSource, config, fixture.seed().keySet(), hooks);
         if (options.command().equals("consume")) {
-          try (var runtime =
-              new KafkaRuntime(bootstrap(), fixture.sha256(), store, ProcessingHooks.NONE)) {
+          try (var runtime = new KafkaRuntime(bootstrap(), fixture.sha256(), store, hooks)) {
             runtime.consumeTo(config, source);
             System.out.println(
                 new JsonMapper()
