@@ -59,7 +59,7 @@ acknowledged manifests, SQL/offset snapshots, barrier/kill/restart/retry logs an
 inventory. Both have SHA256 indexes. Credentials remain in the private ignored environment
 file. Later measured-prose edits do not change tested runtime inputs.
 
-Retained canonical volumes: `p22_rca880a91e724_kafka_data` and
+At acceptance, retained canonical volumes were `p22_rca880a91e724_kafka_data` and
 `p22_rca880a91e724_postgres_data`. Earlier smokes `r069a4941ee2f` and `rb048d787f443`
 retain two volumes each and honest dirty-source identities; the latter exercised one
 actual postcommit kill in 90.137 s. They are separate from canonical evidence. No canonical
@@ -89,7 +89,7 @@ directly. The full canonical run above verifies the corrected source; no second 
 was used. Deferred minors: none. The earlier canonical `r90cac148f56b` at `3595595` passed
 its functional study on DrvFS in 285.219 s; it is retained unchanged, including its two
 volumes, and is superseded for Linux packaging by this corrected sample. Alongside both
-earlier smokes, eight Project22 named volumes are retained in total. The local milestone
+earlier smokes, eight Project22 named volumes were retained in total. The local milestone
 used no paid/provider calls or cloud resources.
 
 Local integration completed on 31 October 2026: main fast-forwarded from `16d503b` to
@@ -98,9 +98,9 @@ integration and 23 Python checks, with zero failures/errors/skips. Runtime input
 packaged JAR SHA256 are unchanged from the corrected canonical sample. Verification logs,
 copied JUnit reports and integration metadata are private under `.local/integration-2026-10-31`.
 All 348 raw evidence files were copied into the main checkout with matching hashes.
-The merged feature branch was retired; its old worktree is retained detached, preserving
+The merged feature branch was retired; its old worktree was initially retained detached, preserving
 archived scratch after the earlier automatic cleanup-policy rejection. Eight data volumes
-remain and no owned containers run.
+were retained and no owned containers ran at that integration closeout.
 
 On 31 October 2026 Dmitry approved publication of the
 [public source repository](https://github.com/DmitryLyubaev/retail-event-stream).
@@ -115,3 +115,13 @@ repository permissions, a 20-minute timeout and no deployment credentials. The w
 was checked with actionlint 1.7.12; full Git history passed redacted Gitleaks 8.30.1 scanning
 before publication. Secret scanning and push protection are enabled. Raw private evidence,
 environment files, caches and retained volumes remain excluded from Git history.
+
+After publication, the owner requested finished-project housekeeping to save space.
+Both detached worktrees (about 190 MiB of files), all eight owned demo volumes, four
+Project22 application images and six explicitly identified build-cache records were
+removed. Source remains committed/pushed and the measured evidence/source bundles are
+preserved, with an additional hash-verified compact archive of 971 receipt/source files.
+Shared Docker base images and other projects' resources were preserved. Automatic tool
+approval blocked recursive removal of the primary checkout's remaining local caches and
+build outputs with reason "blocked by policy"; those directories remain. This cleanup
+changes no runtime source or measured acceptance result.
