@@ -138,6 +138,15 @@ public final class KafkaRuntime implements AutoCloseable {
       throw new IllegalStateException("Source boundary or fixture changed");
   }
 
+  public boolean groupExists(String groupId) {
+    try {
+      return admin.listConsumerGroups().all().get(5, TimeUnit.SECONDS).stream()
+          .anyMatch(group -> group.groupId().equals(groupId));
+    } catch (Exception ex) {
+      throw new IllegalStateException("Cannot inspect fresh group", ex);
+    }
+  }
+
   public void consumeTo(ProjectionConfig config, SourceBoundary target) {
     if (store == null
         || !config.topic().equals(target.topic())

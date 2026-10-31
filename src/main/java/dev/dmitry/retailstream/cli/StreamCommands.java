@@ -83,6 +83,13 @@ public final class StreamCommands {
         return 0;
       }
       var dataSource = injected == null ? environmentDataSource() : injected;
+      if (options.command().equals("rebuild")) {
+        var rebuilt =
+            new dev.dmitry.retailstream.replay.RebuildCommand(dataSource, bootstrap())
+                .run(config, source, fixture.seed());
+        System.out.println(rebuilt.canonicalJson());
+        return 0;
+      }
       if (options.command().equals("init")) {
         new SchemaManager(dataSource).createFresh(config, fixture.seed());
         System.out.println(

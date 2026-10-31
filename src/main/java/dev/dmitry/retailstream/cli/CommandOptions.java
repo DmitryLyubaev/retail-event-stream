@@ -10,7 +10,7 @@ public record CommandOptions(String command, Map<String, String> options) {
 
   public static CommandOptions parse(String[] args) {
     if (args.length == 0
-        || !Set.of("validate", "init", "snapshot", "publish", "consume", "offsets")
+        || !Set.of("validate", "init", "snapshot", "publish", "consume", "offsets", "rebuild")
             .contains(args[0])
         || args.length % 2 != 1)
       throw new IllegalArgumentException("Expected a supported command and option/value pairs");
@@ -69,8 +69,10 @@ public record CommandOptions(String command, Map<String, String> options) {
   }
 
   public String projection() {
-    String value = options.getOrDefault("--projection", "live");
-    if (!Set.of("live", "rebuild").contains(value))
+    String value =
+        options.getOrDefault("--projection", command.equals("rebuild") ? "rebuild" : "live");
+    if (!Set.of("live", "rebuild").contains(value)
+        || (command.equals("rebuild") && !value.equals("rebuild")))
       throw new IllegalArgumentException("Unknown projection");
     return value;
   }

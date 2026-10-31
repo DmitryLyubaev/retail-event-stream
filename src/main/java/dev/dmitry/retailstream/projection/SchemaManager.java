@@ -58,6 +58,14 @@ public final class SchemaManager {
             });
   }
 
+  public boolean schemaExists(ProjectionConfig config) {
+    return jdbc.queryForObject(
+            "select count(*) from information_schema.schemata where schema_name=?",
+            Integer.class,
+            config.schema())
+        != 0;
+  }
+
   public void requireMatching(ProjectionConfig config) {
     var rows = jdbc.queryForList("select * from " + config.table("projection_meta"));
     if (rows.size() != 1) throw new IllegalArgumentException("Missing projection metadata");

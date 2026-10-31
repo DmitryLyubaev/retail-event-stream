@@ -46,5 +46,7 @@ class CommandKafkaIT {
     assertEquals(0, command.execute(args));
     args[0] = "offsets";
     assertEquals(0, command.execute(args));
+    args[0] = "rebuild";
+    assertEquals(0, command.execute(args));
   }
 }
