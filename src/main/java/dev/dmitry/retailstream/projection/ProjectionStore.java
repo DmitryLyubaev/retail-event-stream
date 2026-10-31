@@ -18,6 +18,7 @@ public final class ProjectionStore {
   private final ProjectionConfig config;
   private final JdbcTemplate jdbc;
   private final TransactionTemplate transaction;
+  private final TransactionTemplate snapshotTransaction;
   private final EventContract contract;
   private final ProcessingHooks hooks;
 
@@ -28,6 +29,13 @@ public final class ProjectionStore {
     this.jdbc = new JdbcTemplate(dataSource);
     this.transaction = new TransactionTemplate(new JdbcTransactionManager(dataSource));
     transaction.setTimeout(5);
+    snapshotTransaction = new TransactionTemplate(new JdbcTransactionManager(dataSource));
+    snapshotTransaction.setReadOnly(true);
+    snapshotTransaction.setIsolationLevel(
+        org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
+    snapshotTransaction.setPropagationBehavior(
+        org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    snapshotTransaction.setTimeout(5);
     this.contract = new EventContract(products);
     this.hooks = Objects.requireNonNull(hooks);
   }
@@ -149,6 +157,10 @@ public final class ProjectionStore {
   }
 
   public ProjectionSnapshot snapshot() {
+    return Objects.requireNonNull(snapshotTransaction.execute(status -> readSnapshot()));
+  }
+
+  private ProjectionSnapshot readSnapshot() {
     var result = new TreeMap<String, Object>();
     result.put(
         "inventory",

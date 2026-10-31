@@ -14,6 +14,81 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import tools.jackson.databind.json.JsonMapper;
 
 class ProjectionStoreIT {
+  static Object call(java.lang.reflect.Method method, Object target, Object[] args)
+      throws Throwable {
+    try {
+      return method.invoke(target, args);
+    } catch (java.lang.reflect.InvocationTargetException error) {
+      throw error.getCause();
+    }
+  }
+
+  @Test
+  void snapshot_is_coherent_when_a_writer_commits_between_reads() throws Exception {
+    var afterFirstResult = new java.util.concurrent.atomic.AtomicReference<Runnable>();
+    var interleaving =
+        new org.springframework.jdbc.datasource.DelegatingDataSource(db.dataSource) {
+          @Override
+          public java.sql.Connection getConnection() throws java.sql.SQLException {
+            var real = super.getConnection();
+            return (java.sql.Connection)
+                java.lang.reflect.Proxy.newProxyInstance(
+                    getClass().getClassLoader(),
+                    new Class<?>[] {java.sql.Connection.class},
+                    (connection, method, args) -> {
+                      var result = call(method, real, args);
+                      if (method.getName().equals("createStatement")) {
+                        var statement = (java.sql.Statement) result;
+                        return java.lang.reflect.Proxy.newProxyInstance(
+                            getClass().getClassLoader(),
+                            new Class<?>[] {java.sql.Statement.class},
+                            (ignored, operation, parameters) -> {
+                              var value = call(operation, statement, parameters);
+                              if (value instanceof java.sql.ResultSet rows)
+                                return java.lang.reflect.Proxy.newProxyInstance(
+                                    getClass().getClassLoader(),
+                                    new Class<?>[] {java.sql.ResultSet.class},
+                                    (ignoredRows, read, arguments) -> {
+                                      var answer = call(read, rows, arguments);
+                                      if (read.getName().equals("close")) {
+                                        var action = afterFirstResult.getAndSet(null);
+                                        if (action != null) action.run();
+                                      }
+                                      return answer;
+                                    });
+                              return value;
+                            });
+                      }
+                      return result;
+                    });
+          }
+        };
+    var reader =
+        new ProjectionStore(interleaving, config, fixture.seed().keySet(), ProcessingHooks.NONE);
+    var committed = new java.util.concurrent.atomic.AtomicBoolean();
+    afterFirstResult.set(
+        () -> {
+          store.process(raw(0, 0));
+          committed.set(true);
+        });
+    var observed = new JsonMapper().readTree(reader.snapshot().canonicalJson());
+    assertTrue(committed.get(), "Writer really committed between snapshot query results");
+    assertEquals(2, observed.get("inventory").get(0).get("balance").longValue());
+    assertEquals(
+        0,
+        observed.get("receipts").size(),
+        "Readback must not combine old balance and new receipt");
+    assertEquals(0, observed.get("processing").size());
+    assertEquals(
+        -1,
+        new JsonMapper()
+            .readTree(store.snapshot().canonicalJson())
+            .get("inventory")
+            .get(0)
+            .get("balance")
+            .longValue());
+  }
+
   static TestDatabase db;
   final FrozenFixture fixture = FrozenFixture.load(Path.of("fixtures"));
   ProjectionConfig config;

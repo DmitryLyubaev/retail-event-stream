@@ -25,6 +25,14 @@ acknowledgement. An explicit fault-free restart is distinct from an infinite ret
 Database connections, SQL, broker requests, startup, barriers and catch-up have finite
 timeouts. Unexpected shutdowns never turn into successful/skipped evidence.
 
+Transaction-start connection failures retry only for SQLSTATE class 08, too-many-connections
+53300 or cannot-connect-now 57P03. Authentication, missing database and unclassified
+transaction-start failures stop immediately. Classification uses PostgreSQL's stable
+[error codes](https://www.postgresql.org/docs/17/errcodes-appendix.html), not message text.
+CLI snapshots use a separate read-only repeatable-read transaction so all three queries
+see one committed database state while consumption continues. The isolation behavior is
+documented by [PostgreSQL](https://www.postgresql.org/docs/17/transaction-iso.html#XACT-REPEATABLE-READ).
+
 Each run has its own labelled Compose project, topics, groups, schemas and two named
 volumes, with no published host ports. App containers are limited to 384 MiB, PostgreSQL
 512 MiB and Kafka 1536 MiB. Integration containers bind random loopback ports and run

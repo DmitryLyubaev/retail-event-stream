@@ -14,6 +14,74 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import tools.jackson.databind.json.JsonMapper;
 
 class KafkaPipelineIT {
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(ints = {2, 3})
+  void connection_opening_failures_use_budget_and_preserve_offsets(int failures) {
+    var cfg = config();
+    new SchemaManager(broker.database.dataSource).createFresh(cfg, fixture.seed());
+    class ConnectionGate extends org.springframework.jdbc.datasource.DelegatingDataSource {
+      int remaining;
+      int attempts;
+      boolean armed;
+
+      ConnectionGate() {
+        super(broker.database.dataSource);
+      }
+
+      @Override
+      public java.sql.Connection getConnection() throws java.sql.SQLException {
+        if (armed) {
+          attempts++;
+          if (remaining-- > 0)
+            throw new java.sql.SQLException("injected connection opening refusal", "08001");
+        }
+        return super.getConnection();
+      }
+    }
+    var source = new ConnectionGate();
+    var guarded = new ProjectionStore(source, cfg, fixture.seed().keySet(), ProcessingHooks.NONE);
+    var healthy = store(cfg, ProcessingHooks.NONE);
+    try (var runtime =
+        new KafkaRuntime(
+            broker.container.getBootstrapServers(),
+            fixture.sha256(),
+            guarded,
+            ProcessingHooks.NONE)) {
+      runtime.createTopic(cfg.topic());
+      var manifest =
+          new FixtureProducer(runtime)
+              .publishRecords(List.of(fixture.records().get(2)), fixture.sha256(), cfg.topic());
+      source.remaining = failures;
+      source.armed = true;
+      if (failures == 2) assertDoesNotThrow(() -> runtime.consumeTo(cfg, manifest.boundary()));
+      else assertThrows(RuntimeException.class, () -> runtime.consumeTo(cfg, manifest.boundary()));
+      assertEquals(3, source.attempts);
+      source.armed = false;
+      var snapshot = new JsonMapper().readTree(healthy.snapshot().canonicalJson());
+      assertEquals(failures == 2 ? 1 : 0, snapshot.get("receipts").size());
+      assertEquals(failures == 2 ? 1 : 0, snapshot.get("processing").size());
+      assertEquals(
+          failures == 2 ? 4 : 0, snapshot.get("inventory").get(2).get("balance").longValue());
+      Long position = runtime.committed(cfg.groupId(), cfg.topic()).get(2);
+      if (failures == 2) assertEquals(1L, position);
+      else {
+        assertTrue(position == null || position == 0);
+        try (var recovery =
+            new KafkaRuntime(
+                broker.container.getBootstrapServers(),
+                fixture.sha256(),
+                healthy,
+                ProcessingHooks.NONE)) {
+          recovery.consumeTo(cfg, manifest.boundary());
+          assertEquals(1L, recovery.committed(cfg.groupId(), cfg.topic()).get(2));
+          assertEquals(
+              1,
+              new JsonMapper().readTree(healthy.snapshot().canonicalJson()).get("receipts").size());
+        }
+      }
+    }
+  }
+
   @Test
   void rejection_write_failure_does_not_ack() {
     var cfg = config();

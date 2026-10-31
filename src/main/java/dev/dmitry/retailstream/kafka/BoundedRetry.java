@@ -38,9 +38,8 @@ public final class BoundedRetry {
                       java.time.Instant.now().toString())));
       try {
         return operation.apply(record);
-      } catch (org.springframework.dao.TransientDataAccessException
-          | org.springframework.dao.DataAccessResourceFailureException ex) {
-        if (attempt == 3) throw ex;
+      } catch (RuntimeException ex) {
+        if (!retryable(ex) || attempt == 3) throw ex;
         try {
           sleeper.sleep(attempt == 1 ? 100 : 500);
         } catch (InterruptedException interrupted) {
@@ -50,5 +49,21 @@ public final class BoundedRetry {
       }
     }
     throw new IllegalStateException("Unreachable retry state");
+  }
+
+  private static boolean retryable(RuntimeException failure) {
+    if (failure instanceof org.springframework.dao.TransientDataAccessException
+        || failure instanceof org.springframework.dao.DataAccessResourceFailureException)
+      return true;
+    if (failure instanceof org.springframework.transaction.CannotCreateTransactionException) {
+      for (Throwable cause = failure.getCause(); cause != null; cause = cause.getCause()) {
+        if (cause instanceof java.sql.SQLException sql) {
+          String state = sql.getSQLState();
+          return state != null
+              && (state.startsWith("08") || state.equals("53300") || state.equals("57P03"));
+        }
+      }
+    }
+    return false;
   }
 }
