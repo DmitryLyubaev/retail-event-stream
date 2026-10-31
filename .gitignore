@@ -1,0 +1,10 @@
+.worktrees/
+.superpowers/
+.local/
+.env
+.env.*
+!.env.example
+target/
+artifacts/
+__pycache__/
+*.pyc
