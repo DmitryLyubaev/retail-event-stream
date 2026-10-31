@@ -9,6 +9,16 @@ Exact dependencies, image digests and Maven wrapper checksum are in
 [toolchain-lock.json](toolchain-lock.json). One broker, three partitions, one consumer
 thread and one database suffice. There is no web UI or cloud service.
 
+## Hosted verification
+
+[![Verification](https://github.com/DmitryLyubaev/retail-event-stream/actions/workflows/ci.yml/badge.svg)](https://github.com/DmitryLyubaev/retail-event-stream/actions/workflows/ci.yml)
+
+One Ubuntu job runs format/clean build, Java unit tests, real Kafka/PostgreSQL integration
+tests and Python harness checks using the existing scripts. The checkout action and Java
+build image are pinned. The workflow has read-only repository permissions and uses no
+deployment credentials. The [local measured report](docs/acceptance-report.md) records
+the full process-kill/rebuild acceptance study and its limits.
+
 ## Run locally
 
 Use Linux or WSL, Bash, Python 3 and a working Docker Engine with Compose. Docker must
