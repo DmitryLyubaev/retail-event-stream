@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!target
+!target/retail-event-stream-1.0.0.jar
+!fixtures
+!fixtures/**

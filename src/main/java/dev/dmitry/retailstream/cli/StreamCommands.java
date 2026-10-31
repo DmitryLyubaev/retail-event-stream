@@ -2,28 +2,31 @@ package dev.dmitry.retailstream.cli;
 
 import dev.dmitry.retailstream.contract.EventContract;
 import dev.dmitry.retailstream.fixture.FrozenFixture;
+import dev.dmitry.retailstream.kafka.*;
 import dev.dmitry.retailstream.projection.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 public final class StreamCommands {
-  private final javax.sql.DataSource injected;
+  private final DataSource injected;
+  private final String injectedBootstrap;
 
   public StreamCommands() {
-    this(null);
+    this(null, null);
   }
 
-  public StreamCommands(javax.sql.DataSource dataSource) {
+  public StreamCommands(DataSource dataSource) {
+    this(dataSource, null);
+  }
+
+  public StreamCommands(DataSource dataSource, String bootstrap) {
     this.injected = dataSource;
+    this.injectedBootstrap = bootstrap;
   }
 
   public int execute(String[] args) {
@@ -36,9 +39,31 @@ public final class StreamCommands {
         throw new IllegalArgumentException("Invalid frozen fixture", ex);
       }
       if (options.command().equals("validate")) return validate(fixture);
-      var boundary = readBoundary(Path.of(options.required("--manifest")));
-      if (!options.topic().equals(boundary.get("topic").asString())
-          || !fixture.sha256().equals(boundary.get("fixtureSha256").asString()))
+      Path manifestPath = Path.of(options.required("--manifest"));
+      if (options.command().equals("publish")) {
+        if (Files.exists(manifestPath))
+          throw new IllegalArgumentException("Refusing to overwrite existing manifest");
+        Path parent = manifestPath.toAbsolutePath().getParent();
+        if (parent != null) Files.createDirectories(parent);
+        try (var runtime = new KafkaRuntime(bootstrap(), fixture.sha256())) {
+          runtime.createTopic(options.topic());
+          var producer = new FixtureProducer(runtime);
+          var manifest =
+              options.options().getOrDefault("--sample", "full").equals("retry")
+                  ? producer.publishRecords(
+                      List.of(fixture.records().get(2)), fixture.sha256(), options.topic())
+                  : producer.publish(fixture, options.topic());
+          Files.writeString(
+              manifestPath,
+              new JsonMapper().writeValueAsString(manifest),
+              StandardOpenOption.CREATE_NEW);
+          System.out.println(new JsonMapper().writeValueAsString(manifest));
+        }
+        return 0;
+      }
+      var source = sourceBoundary(manifestPath);
+      if (!options.topic().equals(source.topic())
+          || !fixture.sha256().equals(source.fixtureSha256()))
         throw new IllegalArgumentException("Manifest differs from run/fixture");
       var config =
           new ProjectionConfig(
@@ -47,6 +72,16 @@ public final class StreamCommands {
               options.schema(),
               fixture.sha256(),
               fixture.seedSha256());
+      if (options.command().equals("offsets")) {
+        try (var runtime = new KafkaRuntime(bootstrap(), fixture.sha256())) {
+          var output = new TreeMap<String, Object>();
+          output.put("groupId", config.groupId());
+          output.put("committed", runtime.committed(config.groupId(), config.topic()));
+          output.put("boundary", runtime.boundary(config.topic()));
+          System.out.println(new JsonMapper().writeValueAsString(output));
+        }
+        return 0;
+      }
       var dataSource = injected == null ? environmentDataSource() : injected;
       if (options.command().equals("init")) {
         new SchemaManager(dataSource).createFresh(config, fixture.seed());
@@ -56,16 +91,42 @@ public final class StreamCommands {
       } else {
         var store =
             new ProjectionStore(dataSource, config, fixture.seed().keySet(), ProcessingHooks.NONE);
-        System.out.println(store.snapshot().canonicalJson());
+        if (options.command().equals("consume")) {
+          try (var runtime =
+              new KafkaRuntime(bootstrap(), fixture.sha256(), store, ProcessingHooks.NONE)) {
+            runtime.consumeTo(config, source);
+            System.out.println(
+                new JsonMapper()
+                    .writeValueAsString(
+                        Map.of(
+                            "phase",
+                            "caught-up",
+                            "groupId",
+                            config.groupId(),
+                            "committed",
+                            runtime.committed(config.groupId(), config.topic()))));
+          }
+        } else System.out.println(store.snapshot().canonicalJson());
       }
       return 0;
-    } catch (IllegalArgumentException ex) {
+    } catch (IllegalArgumentException | IOException ex) {
       System.err.println(ex.getMessage());
       return 2;
     } catch (RuntimeException ex) {
       System.err.println(ex.getClass().getSimpleName() + ": " + ex.getMessage());
       return 1;
     }
+  }
+
+  private String bootstrap() {
+    String value = injectedBootstrap == null ? System.getenv("P22_BOOTSTRAP") : injectedBootstrap;
+    if (value == null || value.isBlank())
+      throw new IllegalArgumentException("Set P22_BOOTSTRAP for the owned broker");
+    return value;
+  }
+
+  public static SourceBoundary sourceBoundary(Path manifest) {
+    return new JsonMapper().treeToValue(readBoundary(manifest), SourceBoundary.class);
   }
 
   public static JsonNode readBoundary(Path manifest) {
@@ -135,7 +196,7 @@ public final class StreamCommands {
     return 0;
   }
 
-  private static byte[] decode(String encoded) {
-    return encoded == null ? null : Base64.getDecoder().decode(encoded);
+  private static byte[] decode(String value) {
+    return value == null ? null : Base64.getDecoder().decode(value);
   }
 }

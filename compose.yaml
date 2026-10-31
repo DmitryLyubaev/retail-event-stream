@@ -1,0 +1,89 @@
+services:
+  kafka:
+    image: apache/kafka@sha256:8f325fc00143fed78eabe00b033a86747078bb06edc21345d06651f77ae44f30
+    mem_limit: 1536m
+    cpus: 2
+    environment:
+      CLUSTER_ID: ${P22_CLUSTER_ID:?Set a unique retained cluster ID}
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [CMD-SHELL, '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:9092 >/dev/null 2>&1']
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID:?Set a unique run ID}
+  postgres:
+    image: postgres@sha256:2cd2c0f809604aaeff6f0ec8f40aecbd025613107561015c69369a1a7f1d3416
+    mem_limit: 512m
+    cpus: 1
+    environment:
+      POSTGRES_DB: p22
+      POSTGRES_USER: p22
+      POSTGRES_PASSWORD: ${P22_DB_PASSWORD:?Set an owned local password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U p22 -d p22']
+      interval: 1s
+      timeout: 3s
+      retries: 20
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID}
+  app:
+    image: ${P22_APP_IMAGE:-p22-retail-stream:local}
+    profiles: [cli]
+    mem_limit: 384m
+    cpus: 1
+    user: '${P22_UID:-1000}:${P22_GID:-1000}'
+    environment:
+      P22_BOOTSTRAP: kafka:9092
+      P22_DB_URL: jdbc:postgresql://postgres:5432/p22
+      P22_DB_USER: p22
+      P22_DB_PASSWORD: ${P22_DB_PASSWORD}
+      P22_RUN_ID: ${P22_RUN_ID}
+    volumes:
+      - ${P22_EVIDENCE_DIR:?Set a dedicated evidence directory}:/evidence
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID}
+    command: [validate, --fixture, fixtures]
+networks:
+  default:
+    internal: true
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID}
+volumes:
+  kafka_data:
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID}
+  postgres_data:
+    labels:
+      portfolio.project: p22
+      portfolio.run: ${P22_RUN_ID}

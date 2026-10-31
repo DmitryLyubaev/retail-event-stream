@@ -10,14 +10,17 @@ public record CommandOptions(String command, Map<String, String> options) {
 
   public static CommandOptions parse(String[] args) {
     if (args.length == 0
-        || !Set.of("validate", "init", "snapshot").contains(args[0])
+        || !Set.of("validate", "init", "snapshot", "publish", "consume", "offsets")
+            .contains(args[0])
         || args.length % 2 != 1)
       throw new IllegalArgumentException("Expected a supported command and option/value pairs");
     var values = new HashMap<String, String>();
     Set<String> allowed =
         args[0].equals("validate")
             ? Set.of("--fixture")
-            : Set.of("--fixture", "--run-id", "--scenario", "--projection", "--manifest");
+            : args[0].equals("publish")
+                ? Set.of("--fixture", "--run-id", "--scenario", "--manifest", "--sample")
+                : Set.of("--fixture", "--run-id", "--scenario", "--projection", "--manifest");
     for (int i = 1; i < args.length; i += 2)
       if (!allowed.contains(args[i])
           || args[i + 1].isBlank()
@@ -31,6 +34,13 @@ public record CommandOptions(String command, Map<String, String> options) {
       result.scenario();
       result.projection();
       result.required("--manifest");
+    }
+    if (args[0].equals("publish")) {
+      String sample = values.getOrDefault("--sample", "full");
+      if (!Set.of("full", "retry").contains(sample)
+          || (sample.equals("retry")
+              && !Set.of("retryok", "retryfail").contains(result.scenario())))
+        throw new IllegalArgumentException("Unknown or misplaced sample");
     }
     return result;
   }
